@@ -1,0 +1,117 @@
+export interface Apod {
+  title: string
+  date: string
+  explanation: string
+  media_type: 'image' | 'video'
+  url?: string
+  hdurl?: string
+  thumbnail_url?: string
+  copyright?: string
+}
+
+export interface ImageLibraryItem {
+  href?: string
+  data?: Array<{
+    nasa_id: string
+    title: string
+    description?: string
+    date_created?: string
+    media_type?: string
+    photographer?: string
+    center?: string
+  }>
+  links?: Array<{
+    href: string
+    rel?: string
+    render?: string
+  }>
+}
+
+export interface ImageLibraryResponse {
+  collection?: {
+    metadata?: {
+      total_hits?: number
+    }
+    items?: ImageLibraryItem[]
+  }
+}
+
+export interface Asteroid {
+  id: string
+  name: string
+  absolute_magnitude_h?: number
+  is_potentially_hazardous_asteroid?: boolean
+  estimated_diameter?: {
+    meters?: {
+      estimated_diameter_min?: number
+      estimated_diameter_max?: number
+    }
+  }
+  close_approach_data?: Array<{
+    close_approach_date?: string
+    relative_velocity?: {
+      kilometers_per_hour?: string
+    }
+    miss_distance?: {
+      kilometers?: string
+      lunar?: string
+    }
+    orbiting_body?: string
+  }>
+}
+
+export interface AsteroidResponse {
+  near_earth_objects?: Asteroid[]
+  page?: {
+    total_elements?: number
+  }
+}
+
+export interface DonkiNotification {
+  messageType?: string
+  messageID?: string
+  messageURL?: string
+  messageIssueTime?: string
+  messageBody?: string
+}
+
+export interface EonetEvent {
+  id: string
+  title: string
+  description?: string
+  link?: string
+  closed?: string
+  categories?: Array<{
+    id?: string
+    title?: string
+  }>
+  sources?: Array<{
+    id?: string
+    url?: string
+  }>
+  geometry?: Array<{
+    date?: string
+    type?: string
+    coordinates?: unknown
+    magnitudeValue?: number
+    magnitudeUnit?: string
+  }>
+}
+
+export interface EonetResponse {
+  events?: EonetEvent[]
+}
+
+export interface ApiProduct {
+  id: string
+  name: string
+  description: string
+  route: string
+  example: string
+  featured: boolean
+}
+
+export interface CatalogResponse {
+  count: number
+  products: ApiProduct[]
+}
