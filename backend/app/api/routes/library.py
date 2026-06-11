@@ -26,6 +26,7 @@ async def image_search(
     year_start: Annotated[Optional[int], Query(ge=1900)] = None,
     year_end: Annotated[Optional[int], Query(ge=1900)] = None,
     page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 8,
 ) -> Response:
     return await client.get(ProviderName.IMAGES, "search", query_items(request))
 

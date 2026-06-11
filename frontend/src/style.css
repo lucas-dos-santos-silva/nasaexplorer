@@ -24,6 +24,10 @@ body {
   background: #f4f3ef;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 body,
 button,
 input {
@@ -453,7 +457,26 @@ img {
 }
 
 .search-results {
+  position: relative;
   margin-top: 4rem;
+}
+
+.search-results__loading {
+  position: absolute;
+  z-index: 3;
+  top: -2.75rem;
+  right: 0;
+  padding: 0.55rem 0.7rem;
+  color: white;
+  background: #111111;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.search-results-anchor {
+  scroll-margin-top: 1.5rem;
 }
 
 .search-results__meta {
@@ -485,19 +508,22 @@ img {
   list-style: none;
 }
 
-.image-card:nth-child(3n + 1) {
-  grid-row: span 2;
+.image-grid--loading {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .image-card__media {
   position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
   aspect-ratio: 4 / 3;
   overflow: hidden;
+  border: 0;
   background: #d9d7d0;
-}
-
-.image-card:nth-child(3n + 1) .image-card__media {
-  aspect-ratio: 3 / 4;
+  cursor: zoom-in;
+  text-align: left;
 }
 
 .image-card img {
@@ -509,6 +535,28 @@ img {
 
 .image-card:hover img {
   transform: scale(1.035);
+}
+
+.image-card__expand {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.45rem 0.55rem;
+  color: white;
+  background: rgb(17 17 17 / 0.85);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  text-transform: uppercase;
+  transform: translateY(0.5rem);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.image-card__media:hover .image-card__expand,
+.image-card__media:focus-visible .image-card__expand {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .image-card__number {
@@ -540,6 +588,113 @@ img {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.15rem;
   line-height: 1.2;
+}
+
+.image-pagination {
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #111111;
+  text-align: center;
+}
+
+.image-pagination p {
+  margin: 0;
+  color: #66645e;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.image-pagination p strong {
+  color: #111111;
+}
+
+.image-pagination button {
+  padding: 0.85rem 1rem;
+  border: 1px solid #111111;
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.image-pagination button:disabled {
+  border-color: #aaa8a1;
+  color: #aaa8a1;
+  cursor: not-allowed;
+}
+
+.image-lightbox {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+  padding: 4.5rem 1rem 1rem;
+  color: white;
+  background: rgb(5 7 11 / 0.96);
+  place-items: center;
+}
+
+.image-lightbox__close {
+  position: fixed;
+  z-index: 1;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgb(255 255 255 / 0.5);
+  color: white;
+  background: #111111;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.image-lightbox__content {
+  display: grid;
+  width: min(100%, 1280px);
+  max-height: calc(100vh - 5.5rem);
+  gap: 1.5rem;
+  margin: auto;
+  overflow: hidden;
+}
+
+.image-lightbox__content img {
+  width: 100%;
+  min-height: 0;
+  max-height: 58vh;
+  object-fit: contain;
+  background: #111111;
+}
+
+.image-lightbox__content figcaption {
+  min-height: 0;
+  max-width: 850px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.image-lightbox__content h2 {
+  margin: 0.45rem 0 0;
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: clamp(1.8rem, 5vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.image-lightbox__content figcaption > p:last-child {
+  margin: 1rem 0 0;
+  color: rgb(255 255 255 / 0.68);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.55;
 }
 
 .image-search__prompt {
@@ -585,6 +740,64 @@ img {
 .asteroid-layout {
   display: grid;
   gap: 4rem;
+}
+
+.asteroid-tools {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid rgb(255 255 255 / 0.3);
+  border-bottom: 1px solid rgb(255 255 255 / 0.3);
+}
+
+.asteroid-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.asteroid-tabs button,
+.asteroid-period button,
+.asteroid-pagination button {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  color: white;
+  background: transparent;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.asteroid-tabs button.active {
+  border-color: #ef3340;
+  background: #ef3340;
+}
+
+.asteroid-period {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.asteroid-period label {
+  display: grid;
+  gap: 0.35rem;
+  color: rgb(255 255 255 / 0.55);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.asteroid-period input {
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  color: white;
+  color-scheme: dark;
+  background: transparent;
 }
 
 .asteroid-orbit {
@@ -672,6 +885,31 @@ img {
   text-transform: uppercase;
 }
 
+.asteroid-summary {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  text-align: right;
+}
+
+.asteroid-summary dt,
+.asteroid-detail dt {
+  color: rgb(255 255 255 / 0.45);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.asteroid-summary dd {
+  margin: 0.2rem 0 0;
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: 1.4rem;
+}
+
 .asteroid-list {
   margin: 0;
   padding: 0;
@@ -680,11 +918,29 @@ img {
 }
 
 .asteroid-list li {
+  border-bottom: 1px solid rgb(255 255 255 / 0.18);
+}
+
+.asteroid-list li.selected {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.asteroid-list li > button {
   display: grid;
+  width: 100%;
   grid-template-columns: 38px 1fr;
   gap: 1rem;
   padding: 1.5rem 0;
-  border-bottom: 1px solid rgb(255 255 255 / 0.18);
+  border: 0;
+  color: white;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.asteroid-list li > button:hover h3,
+.asteroid-list li > button:focus-visible h3 {
+  color: #ef3340;
 }
 
 .asteroid-list__rank {
@@ -734,6 +990,279 @@ img {
 .event-card dd {
   margin: 0.3rem 0 0;
   font-size: 0.75rem;
+}
+
+.asteroid-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.5rem;
+}
+
+.asteroid-pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.asteroid-pagination span {
+  color: rgb(255 255 255 / 0.55);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.asteroid-detail {
+  margin: 0 0 1.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-top: 1px solid rgb(255 255 255 / 0.3);
+  border-right: 1px solid rgb(255 255 255 / 0.3);
+  border-bottom: 1px solid rgb(255 255 255 / 0.3);
+  border-left: 3px solid #ef3340;
+  background: #10151f;
+}
+
+.asteroid-detail h3 {
+  margin: 0.5rem 0 1.5rem;
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: clamp(2rem, 5vw, 4rem);
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.asteroid-detail > p:not(.eyebrow) {
+  color: rgb(255 255 255 / 0.6);
+}
+
+.asteroid-detail__error {
+  color: #ff7a83 !important;
+}
+
+.asteroid-detail dl {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding-block: 1.5rem;
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+  border-bottom: 1px solid rgb(255 255 255 / 0.2);
+}
+
+.asteroid-detail dd {
+  margin: 0.3rem 0 0;
+}
+
+.asteroid-detail a {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid currentColor;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.exoplanet-section {
+  color: white;
+  background: #160d27;
+}
+
+.exoplanet-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid rgb(255 255 255 / 0.25);
+  border-bottom: 1px solid rgb(255 255 255 / 0.25);
+}
+
+.exoplanet-tabs button {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  color: white;
+  background: transparent;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.exoplanet-tabs button.active {
+  border-color: #9b6cff;
+  background: #7040d0;
+}
+
+.exoplanet-layout {
+  display: grid;
+  gap: 4rem;
+}
+
+.exoplanet-observatory {
+  position: relative;
+  min-height: 430px;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  background:
+    radial-gradient(circle at 25% 20%, rgb(155 108 255 / 0.2), transparent 22%),
+    radial-gradient(circle at 75% 70%, rgb(37 194 255 / 0.12), transparent 20%),
+    #090510;
+}
+
+.exoplanet-orbit {
+  position: absolute;
+  inset: 0;
+}
+
+.exoplanet-star {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #fff1a8;
+  box-shadow: 0 0 35px #ffc857, 0 0 100px rgb(255 200 87 / 0.45);
+  transform: translate(-50%, -50%);
+}
+
+.exoplanet-orbit i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+}
+
+.exoplanet-orbit i:nth-of-type(1) {
+  width: 130px;
+  height: 75px;
+}
+
+.exoplanet-orbit i:nth-of-type(2) {
+  width: 220px;
+  height: 125px;
+}
+
+.exoplanet-orbit i:nth-of-type(3) {
+  width: 320px;
+  height: 180px;
+}
+
+.exoplanet-orbit i:nth-of-type(4) {
+  width: 440px;
+  height: 245px;
+}
+
+.exoplanet-orbit b {
+  position: absolute;
+  top: 34%;
+  right: 17%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #d7c6ff, #7040d0 55%, #281052);
+  box-shadow: 0 0 24px rgb(155 108 255 / 0.7);
+}
+
+.exoplanet-observatory > p {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  margin: 0;
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: clamp(3rem, 7vw, 6rem);
+  letter-spacing: -0.07em;
+  line-height: 0.8;
+}
+
+.exoplanet-observatory small {
+  display: block;
+  margin-top: 0.9rem;
+  color: rgb(255 255 255 / 0.55);
+  font-family: Arial, sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.exoplanet-results {
+  border-top: 1px solid rgb(255 255 255 / 0.35);
+}
+
+.exoplanet-results article {
+  border-bottom: 1px solid rgb(255 255 255 / 0.18);
+}
+
+.exoplanet-results article.selected {
+  background: rgb(255 255 255 / 0.05);
+}
+
+.exoplanet-results article > button {
+  display: grid;
+  width: 100%;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  border: 0;
+  color: white;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.exoplanet-results h3 {
+  margin: 0.35rem 0 0.25rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+.exoplanet-results article > button:hover h3,
+.exoplanet-results article > button:focus-visible h3 {
+  color: #b99cff;
+}
+
+.exoplanet-results article > button span {
+  color: rgb(255 255 255 / 0.5);
+  font-size: 0.7rem;
+}
+
+.exoplanet-results dl {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 0;
+}
+
+.exoplanet-results dt {
+  color: rgb(255 255 255 / 0.45);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.exoplanet-results dd {
+  margin: 0.3rem 0 0;
+}
+
+.exoplanet-detail {
+  padding: 1.5rem;
+  border-left: 3px solid #9b6cff;
+  background: #0d0717;
+}
+
+.exoplanet-detail > p {
+  margin: 0 0 1rem;
+  color: #cdbdff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+}
+
+.exoplanet-detail dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 1rem;
+  border-top: 1px solid rgb(255 255 255 / 0.15);
 }
 
 .weather-section {
@@ -934,6 +1463,326 @@ img {
   border-top: 1px solid rgb(255 255 255 / 0.2);
 }
 
+.epic-section {
+  color: white;
+  background: #07111f;
+}
+
+.epic-controls {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid rgb(255 255 255 / 0.25);
+  border-bottom: 1px solid rgb(255 255 255 / 0.25);
+}
+
+.epic-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.epic-tabs button,
+.epic-date button {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  color: white;
+  background: transparent;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.epic-tabs button.active {
+  border-color: #2f81f7;
+  background: #2f81f7;
+}
+
+.epic-date {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.epic-date label {
+  color: rgb(255 255 255 / 0.55);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.epic-date select {
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  border-radius: 0;
+  color: white;
+  color-scheme: dark;
+  background: #07111f;
+}
+
+.epic-viewer {
+  display: grid;
+  gap: 2rem;
+}
+
+.epic-stage {
+  position: relative;
+  display: grid;
+  min-height: 360px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, #172844, #03070d 65%);
+  place-items: center;
+}
+
+.epic-stage > img {
+  width: 100%;
+  height: min(75vw, 760px);
+  object-fit: contain;
+}
+
+.epic-stage__meta {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  background: rgb(3 7 13 / 0.78);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.epic-information h3 {
+  max-width: 820px;
+  margin: 0.6rem 0 1.5rem;
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: clamp(1.8rem, 4vw, 4rem);
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.epic-information dl {
+  display: grid;
+  gap: 1rem;
+  margin: 0 0 1.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+  border-bottom: 1px solid rgb(255 255 255 / 0.2);
+}
+
+.epic-information dt {
+  color: rgb(255 255 255 / 0.45);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.epic-information dd {
+  margin: 0.3rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.epic-information a {
+  display: inline-block;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid currentColor;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.epic-timeline {
+  display: grid;
+  grid-auto-columns: minmax(130px, 170px);
+  grid-auto-flow: column;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0 0 1rem;
+}
+
+.epic-timeline button {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  color: white;
+  background: #03070d;
+  cursor: pointer;
+}
+
+.epic-timeline button.active {
+  border-color: #2f81f7;
+  box-shadow: inset 0 0 0 2px #2f81f7;
+}
+
+.epic-timeline img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.epic-timeline span {
+  display: block;
+  padding: 0.55rem;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.gibs-section {
+  background: #dce7e3;
+}
+
+.gibs-controls {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid #869b94;
+  border-bottom: 1px solid #869b94;
+}
+
+.gibs-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.gibs-tabs button {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #42645a;
+  background: transparent;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.gibs-tabs button.active {
+  color: white;
+  background: #163f35;
+}
+
+.gibs-controls label {
+  display: grid;
+  gap: 0.4rem;
+  color: #49645c;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gibs-controls input {
+  padding: 0.7rem;
+  border: 1px solid #42645a;
+  background: transparent;
+}
+
+.gibs-viewer {
+  display: grid;
+  gap: 2rem;
+}
+
+.gibs-map {
+  position: relative;
+  display: grid;
+  min-height: 300px;
+  overflow: hidden;
+  background: #071b28;
+  place-items: center;
+}
+
+.gibs-map img {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+}
+
+.gibs-map__status {
+  position: absolute;
+  z-index: 2;
+  padding: 0.8rem 1rem;
+  color: white;
+  background: rgb(7 27 40 / 0.9);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gibs-map__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.16) 1px, transparent 1px);
+  background-size: 12.5% 25%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+}
+
+.gibs-information {
+  align-self: center;
+}
+
+.gibs-information h3 {
+  margin: 0.5rem 0 1rem;
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: clamp(2rem, 5vw, 4.8rem);
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+}
+
+.gibs-information > p:not(.eyebrow) {
+  color: #425750;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.55;
+}
+
+.gibs-information dl {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-block: 1.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid #869b94;
+  border-bottom: 1px solid #869b94;
+}
+
+.gibs-information dt {
+  color: #5c746c;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gibs-information dd {
+  margin: 0.3rem 0 0;
+}
+
+.gibs-information a {
+  display: inline-block;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid currentColor;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .catalog-section {
   background: #f4f3ef;
 }
@@ -981,7 +1830,7 @@ img {
   letter-spacing: -0.045em;
 }
 
-.catalog-item > p {
+.catalog-item__description {
   grid-column: 2 / -1;
   margin: 0;
   color: #5c5a55;
@@ -990,22 +1839,98 @@ img {
   line-height: 1.45;
 }
 
-.catalog-item code {
-  grid-column: 2;
-  width: max-content;
-  max-width: 100%;
-  padding: 0.25rem 0.4rem;
-  overflow: hidden;
-  color: #56544f;
-  background: #e3e1da;
-  font-size: 0.64rem;
-  text-overflow: ellipsis;
+.catalog-item__console {
+  display: grid;
+  grid-column: 2 / -1;
+  gap: 0.7rem;
 }
 
-.catalog-item__arrow {
-  grid-row: 1;
-  grid-column: 3;
-  font-size: 1.3rem;
+.catalog-item__console > label {
+  color: #66645e;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.catalog-item__console > select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #aaa8a1;
+  border-radius: 0;
+  background: #f4f3ef;
+  color: #111111;
+  font-size: 0.78rem;
+}
+
+.catalog-item__request {
+  display: grid;
+  border: 1px solid #aaa8a1;
+  background: #ebe9e2;
+}
+
+.catalog-item__request input {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+.catalog-item__request button {
+  padding: 0.8rem;
+  border: 0;
+  border-top: 1px solid #aaa8a1;
+  color: white;
+  background: #111111;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.catalog-item__request button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.catalog-item__error {
+  margin: 0;
+  color: #a10f19;
+  font-size: 0.78rem;
+}
+
+.catalog-item details {
+  min-width: 0;
+  border: 1px solid #aaa8a1;
+  background: #111111;
+  color: white;
+}
+
+.catalog-item summary {
+  padding: 0.8rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.catalog-item pre {
+  max-height: 360px;
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+  color: #d8e4ff;
+  font-family: monospace;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .status-block {
@@ -1144,7 +2069,33 @@ img {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .asteroid-list li {
+  .image-pagination {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .image-pagination button:first-child {
+    justify-self: start;
+  }
+
+  .image-pagination button:last-child {
+    justify-self: end;
+  }
+
+  .image-lightbox__content {
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+    align-items: center;
+  }
+
+  .image-lightbox__content img {
+    height: min(78vh, 900px);
+    max-height: none;
+  }
+
+  .image-lightbox__content figcaption {
+    max-height: 78vh;
+  }
+
+  .asteroid-list li > button {
     grid-template-columns: 38px minmax(0, 1fr) minmax(220px, 0.75fr);
     align-items: center;
   }
@@ -1155,6 +2106,26 @@ img {
     margin: 0;
   }
 
+  .asteroid-tools,
+  .asteroid-period {
+    grid-template-columns: auto 1fr;
+    align-items: end;
+  }
+
+  .asteroid-period {
+    grid-template-columns: repeat(2, minmax(160px, 220px)) auto;
+    justify-content: end;
+  }
+
+  .asteroid-detail dl {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .exoplanet-results article > button {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.65fr);
+    align-items: center;
+  }
+
   .weather-feed li {
     grid-template-columns: 120px 1fr;
   }
@@ -1163,20 +2134,57 @@ img {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .epic-controls {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+  .epic-date {
+    grid-template-columns: minmax(170px, 220px) auto;
+    align-items: end;
+  }
+
+  .epic-date label {
+    grid-column: 1 / -1;
+  }
+
+  .epic-information dl {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gibs-controls {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
   .catalog-item {
-    grid-template-columns: 42px minmax(180px, 0.8fr) minmax(230px, 1.2fr) 160px 30px;
-    align-items: center;
+    grid-template-columns: 42px minmax(180px, 0.7fr) minmax(230px, 1fr);
   }
 
-  .catalog-item > p,
-  .catalog-item code,
-  .catalog-item__arrow {
+  .catalog-item__title,
+  .catalog-item__description {
     grid-row: 1;
-    grid-column: auto;
   }
 
-  .catalog-item__arrow {
-    grid-column: 5;
+  .catalog-item__title {
+    grid-column: 2;
+  }
+
+  .catalog-item__description {
+    grid-column: 3;
+  }
+
+  .catalog-item__console {
+    grid-column: 2 / -1;
+  }
+
+  .catalog-item__request {
+    grid-template-columns: minmax(0, 1fr) 120px;
+  }
+
+  .catalog-item__request button {
+    border-top: 0;
+    border-left: 1px solid #aaa8a1;
   }
 
   .site-footer__grid {
@@ -1227,12 +2235,14 @@ img {
   }
 
   .asteroid-layout,
+  .exoplanet-layout,
   .weather-layout {
     grid-template-columns: minmax(380px, 0.8fr) minmax(0, 1.2fr);
     align-items: start;
   }
 
   .asteroid-orbit,
+  .exoplanet-observatory,
   .solar-disc {
     position: sticky;
     top: 2rem;
@@ -1241,6 +2251,20 @@ img {
 
   .eonet-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .epic-viewer {
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.5fr);
+    align-items: center;
+  }
+
+  .gibs-viewer {
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+    align-items: center;
+  }
+
+  .epic-timeline {
+    grid-column: 1 / -1;
   }
 
   .catalog-header {

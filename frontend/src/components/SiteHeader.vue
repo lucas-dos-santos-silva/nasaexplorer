@@ -6,9 +6,12 @@ const open = ref(false)
 const links = [
   { href: '#imagens', label: 'Imagens' },
   { href: '#asteroides', label: 'Asteroides' },
+  { href: '#exoplanetas', label: 'Exoplanetas' },
   { href: '#clima-espacial', label: 'Clima espacial' },
   { href: '#terra', label: 'Terra' },
-  { href: '#catalogo', label: 'APIs' },
+  { href: '#gibs', label: 'Mapas' },
+  { href: '#epic', label: 'EPIC' },
+  { href: '#catalogo', label: 'Explorar APIs' },
 ]
 
 function closeMenu() {

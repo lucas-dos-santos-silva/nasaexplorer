@@ -26,7 +26,7 @@ class Provider:
 PROVIDERS = {
     ProviderName.NASA: Provider("https://api.nasa.gov", True),
     ProviderName.EONET: Provider("https://eonet.gsfc.nasa.gov/api/v3"),
-    ProviderName.EPIC: Provider("https://api.nasa.gov/EPIC/api", True),
+    ProviderName.EPIC: Provider("https://epic.gsfc.nasa.gov/api"),
     ProviderName.EXOPLANET: Provider("https://exoplanetarchive.ipac.caltech.edu"),
     ProviderName.GIBS: Provider("https://gibs.earthdata.nasa.gov"),
     ProviderName.IMAGES: Provider("https://images-api.nasa.gov"),

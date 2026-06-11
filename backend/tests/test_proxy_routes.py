@@ -33,6 +33,43 @@ def test_image_search_uses_library_provider(client_factory):
     assert captured["url"] == "https://images-api.nasa.gov/search?q=artemis&media_type=image"
 
 
+def test_eonet_requests_json_format(client_factory):
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["url"] = str(request.url)
+        return httpx.Response(200, json={"events": []})
+
+    with client_factory(httpx.MockTransport(handler)) as client:
+        response = client.get("/api/v1/eonet/events?status=open&limit=12&format=rss")
+
+    assert response.status_code == 200
+    assert captured["url"] == (
+        "https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=12&format=json"
+    )
+
+
+def test_gibs_map_builds_controlled_wms_request(client_factory):
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["url"] = str(request.url)
+        return httpx.Response(200, content=b"png", headers={"content-type": "image/png"})
+
+    with client_factory(httpx.MockTransport(handler)) as client:
+        response = client.get("/api/v1/gibs/map?layer=aerosol&date=2026-06-10&width=1000")
+
+    assert response.status_code == 200
+    assert captured["url"].startswith(
+        "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?"
+    )
+    assert "LAYERS=MODIS_Terra_Aerosol" in captured["url"]
+    assert "BBOX=-90%2C-180%2C90%2C180" in captured["url"]
+    assert "WIDTH=1000" in captured["url"]
+    assert "HEIGHT=500" in captured["url"]
+    assert "TIME=2026-06-10" in captured["url"]
+
+
 def test_epic_latest_uses_images_endpoint(client_factory):
     captured = {}
 
@@ -44,7 +81,25 @@ def test_epic_latest_uses_images_endpoint(client_factory):
         response = client.get("/api/v1/epic/natural")
 
     assert response.status_code == 200
-    assert captured["url"] == "https://api.nasa.gov/EPIC/api/natural/images?api_key=test-key"
+    assert captured["url"] == "https://epic.gsfc.nasa.gov/api/natural"
+
+
+def test_exoplanet_explorer_uses_controlled_tap_query(client_factory):
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["url"] = str(request.url)
+        return httpx.Response(200, json=[])
+
+    with client_factory(httpx.MockTransport(handler)) as client:
+        response = client.get("/api/v1/exoplanets/explore/nearby?limit=8")
+
+    assert response.status_code == 200
+    assert captured["url"].startswith("https://exoplanetarchive.ipac.caltech.edu/TAP/sync?")
+    assert "pscomppars" in captured["url"]
+    assert "order+by+sy_dist+asc" in captured["url"]
+    assert "MAXREC=8" in captured["url"]
+    assert "format=json" in captured["url"]
 
 
 def test_mars_rover_photos_use_documented_route(client_factory):

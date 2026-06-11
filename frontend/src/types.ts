@@ -39,7 +39,9 @@ export interface ImageLibraryResponse {
 export interface Asteroid {
   id: string
   name: string
+  nasa_jpl_url?: string
   absolute_magnitude_h?: number
+  is_sentry_object?: boolean
   is_potentially_hazardous_asteroid?: boolean
   estimated_diameter?: {
     meters?: {
@@ -62,9 +64,17 @@ export interface Asteroid {
 
 export interface AsteroidResponse {
   near_earth_objects?: Asteroid[]
+  element_count?: number
   page?: {
     total_elements?: number
+    total_pages?: number
+    number?: number
   }
+}
+
+export interface AsteroidFeedResponse {
+  element_count?: number
+  near_earth_objects?: Record<string, Asteroid[]>
 }
 
 export interface DonkiNotification {
@@ -100,6 +110,40 @@ export interface EonetEvent {
 
 export interface EonetResponse {
   events?: EonetEvent[]
+}
+
+export interface EpicImage {
+  identifier: string
+  caption: string
+  image: string
+  date: string
+  centroid_coordinates?: {
+    lat?: number
+    lon?: number
+  }
+  dscovr_j2000_position?: {
+    x?: number
+    y?: number
+    z?: number
+  }
+}
+
+export interface EpicAvailableDate {
+  date: string
+}
+
+export interface Exoplanet {
+  pl_name?: string
+  hostname: string
+  disc_year?: number
+  disc_pubdate?: string
+  discoverymethod?: string
+  sy_dist?: number
+  pl_rade?: number
+  pl_bmasse?: number
+  pl_orbper?: number
+  st_spectype?: string
+  sy_pnum?: number
 }
 
 export interface ApiProduct {

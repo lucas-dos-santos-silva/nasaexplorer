@@ -15,6 +15,30 @@ router = APIRouter(tags=["Terra"])
 class EpicCollection(str, Enum):
     NATURAL = "natural"
     ENHANCED = "enhanced"
+    AEROSOL = "aerosol"
+    CLOUD = "cloud"
+
+
+class GibsLayer(str, Enum):
+    MODIS_TRUE_COLOR = "modis"
+    VIIRS_TRUE_COLOR = "viirs"
+    AEROSOL = "aerosol"
+    PRECIPITATION = "precipitation"
+
+
+GIBS_LAYERS = {
+    GibsLayer.MODIS_TRUE_COLOR: "MODIS_Terra_CorrectedReflectance_TrueColor",
+    GibsLayer.VIIRS_TRUE_COLOR: "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+    GibsLayer.AEROSOL: "MODIS_Terra_Aerosol",
+    GibsLayer.PRECIPITATION: "IMERG_Precipitation_Rate",
+}
+
+
+def eonet_query(request: Request) -> list[tuple[str, str]]:
+    return [
+        *((key, value) for key, value in query_items(request) if key != "format"),
+        ("format", "json"),
+    ]
 
 
 @router.get("/eonet/events", summary="Listar eventos naturais")
@@ -25,7 +49,7 @@ async def eonet_events(
     limit: Annotated[int, Query(ge=1, le=500)] = 20,
     days: Annotated[Optional[int], Query(ge=1)] = None,
 ) -> Response:
-    return await client.get(ProviderName.EONET, "events", query_items(request))
+    return await client.get(ProviderName.EONET, "events", eonet_query(request))
 
 
 @router.get("/earth/imagery", summary="Consultar uma imagem de satelite por coordenadas")
@@ -59,7 +83,7 @@ async def eonet_event(
     request: Request,
     client: Annotated[NasaClient, Depends(get_nasa_client)],
 ) -> Response:
-    return await client.get(ProviderName.EONET, f"events/{event_id}", query_items(request))
+    return await client.get(ProviderName.EONET, f"events/{event_id}", eonet_query(request))
 
 
 @router.get("/eonet/categories", summary="Listar categorias de eventos")
@@ -67,7 +91,7 @@ async def eonet_categories(
     request: Request,
     client: Annotated[NasaClient, Depends(get_nasa_client)],
 ) -> Response:
-    return await client.get(ProviderName.EONET, "categories", query_items(request))
+    return await client.get(ProviderName.EONET, "categories", eonet_query(request))
 
 
 @router.get("/eonet/categories/{category_id}", summary="Consultar uma categoria EONET")
@@ -79,7 +103,7 @@ async def eonet_category(
     return await client.get(
         ProviderName.EONET,
         f"categories/{category_id}",
-        query_items(request),
+        eonet_query(request),
     )
 
 
@@ -89,7 +113,7 @@ async def eonet_layers(
     request: Request,
     client: Annotated[NasaClient, Depends(get_nasa_client)],
 ) -> Response:
-    return await client.get(ProviderName.EONET, f"layers/{category_id}", query_items(request))
+    return await client.get(ProviderName.EONET, f"layers/{category_id}", eonet_query(request))
 
 
 @router.get("/eonet/sources", summary="Listar fontes EONET")
@@ -97,7 +121,7 @@ async def eonet_sources(
     request: Request,
     client: Annotated[NasaClient, Depends(get_nasa_client)],
 ) -> Response:
-    return await client.get(ProviderName.EONET, "sources", query_items(request))
+    return await client.get(ProviderName.EONET, "sources", eonet_query(request))
 
 
 @router.get("/eonet/sources/{source_id}", summary="Consultar uma fonte EONET")
@@ -106,7 +130,7 @@ async def eonet_source(
     request: Request,
     client: Annotated[NasaClient, Depends(get_nasa_client)],
 ) -> Response:
-    return await client.get(ProviderName.EONET, f"sources/{source_id}", query_items(request))
+    return await client.get(ProviderName.EONET, f"sources/{source_id}", eonet_query(request))
 
 
 @router.get("/epic/{collection}", summary="Listar as imagens EPIC mais recentes")
@@ -117,7 +141,7 @@ async def epic_latest(
 ) -> Response:
     return await client.get(
         ProviderName.EPIC,
-        f"{collection.value}/images",
+        collection.value,
         query_items(request),
     )
 
@@ -160,3 +184,27 @@ async def gibs_capabilities(
         f"wmts/{projection}/best/1.0.0/WMTSCapabilities.xml",
         query_items(request),
     )
+
+
+@router.get("/gibs/map", summary="Gerar uma visualizacao global do GIBS")
+async def gibs_map(
+    client: Annotated[NasaClient, Depends(get_nasa_client)],
+    layer: Annotated[GibsLayer, Query()] = GibsLayer.MODIS_TRUE_COLOR,
+    selected_date: Annotated[Optional[date], Query(alias="date")] = None,
+    width: Annotated[int, Query(ge=400, le=1600)] = 1200,
+) -> Response:
+    observation_date = selected_date or date.today()
+    params = [
+        ("SERVICE", "WMS"),
+        ("REQUEST", "GetMap"),
+        ("VERSION", "1.3.0"),
+        ("LAYERS", GIBS_LAYERS[layer]),
+        ("STYLES", ""),
+        ("CRS", "EPSG:4326"),
+        ("BBOX", "-90,-180,90,180"),
+        ("WIDTH", str(width)),
+        ("HEIGHT", str(width // 2)),
+        ("FORMAT", "image/png"),
+        ("TIME", observation_date.isoformat()),
+    ]
+    return await client.get(ProviderName.GIBS, "wms/epsg4326/best/wms.cgi", params)

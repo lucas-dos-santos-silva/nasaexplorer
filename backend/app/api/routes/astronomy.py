@@ -30,6 +30,12 @@ class Rover(str, Enum):
     SPIRIT = "spirit"
 
 
+class ExoplanetView(str, Enum):
+    RECENT = "recent"
+    NEARBY = "nearby"
+    SYSTEMS = "systems"
+
+
 SSD_PATHS = {
     SsdService.CAD: "cad.api",
     SsdService.FIREBALL: "fireball.api",
@@ -39,6 +45,23 @@ SSD_PATHS = {
     SsdService.SBDB_QUERY: "sbdb_query.api",
     SsdService.SCOUT: "scout.api",
     SsdService.SENTRY: "sentry.api",
+}
+
+EXOPLANET_QUERIES = {
+    ExoplanetView.RECENT: (
+        "select pl_name,hostname,disc_year,disc_pubdate,discoverymethod,"
+        "sy_dist,pl_rade,pl_bmasse,pl_orbper,st_spectype,sy_pnum "
+        "from pscomppars order by disc_pubdate desc"
+    ),
+    ExoplanetView.NEARBY: (
+        "select pl_name,hostname,disc_year,disc_pubdate,discoverymethod,"
+        "sy_dist,pl_rade,pl_bmasse,pl_orbper,st_spectype,sy_pnum "
+        "from pscomppars where sy_dist is not null order by sy_dist asc"
+    ),
+    ExoplanetView.SYSTEMS: (
+        "select distinct hostname,sy_pnum,sy_dist,st_spectype "
+        "from pscomppars where sy_pnum >= 4 order by sy_pnum desc"
+    ),
 }
 
 
@@ -107,6 +130,20 @@ async def exoplanets(
     params = [
         ("query", query),
         ("format", output_format),
+    ]
+    return await client.get(ProviderName.EXOPLANET, "TAP/sync", params)
+
+
+@router.get("/exoplanets/explore/{view}", summary="Explorar dados selecionados de exoplanetas")
+async def explore_exoplanets(
+    view: ExoplanetView,
+    client: Annotated[NasaClient, Depends(get_nasa_client)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 12,
+) -> Response:
+    params = [
+        ("query", EXOPLANET_QUERIES[view]),
+        ("format", "json"),
+        ("MAXREC", str(limit)),
     ]
     return await client.get(ProviderName.EXOPLANET, "TAP/sync", params)
 

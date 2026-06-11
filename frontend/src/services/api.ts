@@ -45,7 +45,13 @@ export async function apiGet<T>(
     throw new ApiError(message, response.status)
   }
 
-  return response.json() as Promise<T>
+  const contentType = response.headers.get('content-type') || ''
+
+  if (contentType.includes('application/json') || contentType.includes('+json')) {
+    return response.json() as Promise<T>
+  }
+
+  return response.text() as Promise<T>
 }
 
 export function mediaUrl(url?: string): string {

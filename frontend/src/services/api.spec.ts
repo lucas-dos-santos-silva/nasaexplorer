@@ -46,4 +46,15 @@ describe('api service', () => {
       }),
     )
   })
+
+  it('preserva respostas XML como texto', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('<Capabilities />', {
+        status: 200,
+        headers: { 'Content-Type': 'text/xml' },
+      }),
+    )
+
+    await expect(apiGet<string>('/gibs/capabilities')).resolves.toBe('<Capabilities />')
+  })
 })
